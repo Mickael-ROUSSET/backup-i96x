@@ -59,7 +59,7 @@ try {
     & $Python -m compileall -q (Join-Path $InstallDir 'backup_i96x.py') (Join-Path $InstallDir 'backup_trend')
     if ($LASTEXITCODE -ne 0) { throw 'Compilation Python echouee.' }
     $action = New-ScheduledTaskAction -Execute $Python -Argument ('"' + (Join-Path $InstallDir 'backup_i96x.py') + '" --once --config "' + $ini + '"') -WorkingDirectory $InstallDir
-    $trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Monday -At '14:05'
+    $trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Saturday -At '20:00'
     $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -ExecutionTimeLimit (New-TimeSpan -Hours 4) -MultipleInstances IgnoreNew
     # SYSTEM n'a pas automatiquement les droits SQL. Ne jamais activer avant verification.
     $account = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount -RunLevel Highest
