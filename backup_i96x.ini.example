@@ -1,0 +1,16 @@
+[sql]
+serveur = localhost
+base = i96X
+sqlcmd = sqlcmd
+authentification_windows = true
+
+[sauvegarde]
+repertoire = C:\Backup_SQL
+frequence_minutes = 1440
+nombre_a_conserver = 14
+verification_restore_verifyonly = true
+prefixe = i96X
+
+[journal]
+fichier = C:\Backup_SQL\backup_i96X.log
+niveau = INFO
