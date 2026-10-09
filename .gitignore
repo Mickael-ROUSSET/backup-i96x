@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+.venv/
+backup_i96x.ini
+*.bak
+*.log
+*.zip
