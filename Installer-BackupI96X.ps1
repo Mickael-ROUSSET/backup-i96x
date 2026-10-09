@@ -28,13 +28,40 @@ $required = @('backup_i96x.py','backup_i96x.ini.example','backup_trend\__init__.
 foreach ($file in $required) {
     if (-not (Test-Path -LiteralPath (Join-Path $source $file) -PathType Leaf)) { throw "Fichier manquant : $file" }
 }
-if (-not $Python) {
-    $cmd = Get-Command python.exe -CommandType Application -ErrorAction SilentlyContinue
-    if ($cmd) { $Python = $cmd.Source }
+function Resolve-Python([string]$Requested) {
+    $candidates = @()
+    if ($Requested) { $candidates += $Requested }
+    foreach ($name in @('python.exe','python3.exe')) {
+        $cmd = Get-Command $name -CommandType Application -ErrorAction SilentlyContinue
+        if ($cmd) { $candidates += $cmd.Source }
+    }
+    foreach ($root in @('HKLM:\SOFTWARE\Python\PythonCore','HKCU:\SOFTWARE\Python\PythonCore','HKLM:\SOFTWARE\WOW6432Node\Python\PythonCore')) {
+        foreach ($key in @(Get-ChildItem -LiteralPath $root -ErrorAction SilentlyContinue)) {
+            $install = Get-Item -LiteralPath ($key.PSPath + '\InstallPath') -ErrorAction SilentlyContinue
+            if ($install -and $install.GetValue('')) { $candidates += (Join-Path $install.GetValue('') 'python.exe') }
+        }
+    }
+    foreach ($base in @($env:LOCALAPPDATA, $env:ProgramFiles, ${env:ProgramFiles(x86)})) {
+        if (-not $base) { continue }
+        foreach ($pattern in @('Programs\Python\Python*\python.exe','Python*\python.exe','Python\bin\python3.exe')) {
+            $candidates += @(Get-ChildItem -Path (Join-Path $base $pattern) -File -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName)
+        }
+    }
+    foreach ($candidate in @($candidates | Select-Object -Unique)) {
+        if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) { continue }
+        if ($candidate -match '\\WindowsApps\\') { continue }
+        try {
+            & $candidate -c 'import sys; assert sys.version_info >= (3, 9); print(sys.executable)' 2>$null | Out-Null
+            if ($LASTEXITCODE -eq 0) { return $candidate }
+        } catch { }
+    }
+    return $null
 }
-if (-not $Python -or -not (Test-Path -LiteralPath $Python -PathType Leaf)) { throw 'Python introuvable. Fournissez -Python avec le chemin complet.' }
-& $Python -c 'import sys; assert sys.version_info >= (3, 9)'
-if ($LASTEXITCODE -ne 0) { throw 'Python 3.9 minimum requis pour cette installation.' }
+$Python = Resolve-Python $Python
+if (-not $Python) {
+    throw 'Python >= 3.9 introuvable. Executez py -0p ou Get-Command python,python3 ; fournissez ensuite -Python avec le chemin complet.'
+}
+Write-Host "Python detecte : $Python"
 $oldTask = Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
 if ($oldTask -and -not $Update) {
     throw "La tache existe deja : $TaskName. Aucune modification. Utilisez -Update apres sauvegarde de la definition existante."
