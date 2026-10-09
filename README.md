@@ -12,7 +12,7 @@ Dans PowerShell administrateur :
 .\Installer-BackupI96X.ps1 -Python 'C:\Chemin\python.exe'
 ```
 
-L'installateur prépare la tâche **désactivée** `Sauvegarde BDD Trend 963` pour le lundi à 14 h 05, sous le compte `SYSTEM`. Il conserve `backup_i96x.ini` s'il existe, ne lance aucune sauvegarde et ne supprime aucun fichier `.bak`.
+L'installateur prépare la tâche **désactivée** `Sauvegarde BDD Trend 963` pour le samedi à 20 h 00, sous le compte `SYSTEM`. Il conserve `backup_i96x.ini` s'il existe, ne lance aucune sauvegarde et ne supprime aucun fichier `.bak`.
 
 **Important :** `SYSTEM` doit avoir les droits SQL appropriés ; ils ne sont pas accordés automatiquement. Le service SQL Server doit pouvoir écrire dans `C:\Backup_SQL`. La migration d'une tâche existante exige `-Update` et remplace celle-ci par une tâche désactivée : exporter d'abord sa définition et vérifier les droits avant bascule.
 
